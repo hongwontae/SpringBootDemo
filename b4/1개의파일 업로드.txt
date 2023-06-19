@@ -1,0 +1,53 @@
+    @PostMapping("/upload")
+    public UploadResultDTO upload(MultipartFile file) {
+
+        UploadResultDTO result = null;
+
+        String fileName = file.getOriginalFilename();
+
+        log.info("fileName: " + fileName);
+
+        long size = file.getSize();
+
+        String uuidStr = UUID.randomUUID().toString();
+
+        String saveFileName = uuidStr + "_" + fileName;
+
+        File saveFile = new File(uploadPath, saveFileName);
+
+        try {
+            // 파일 확장자 체크 (File extension check)
+
+            FileCopyUtils.copy(file.getBytes(), saveFile);
+
+            result = UploadResultDTO.builder()
+                    .uuid(uuidStr)
+                    .fileName(fileName)
+                    .build();
+
+            // 이미지 파일 여부 확인
+            String mimeType = Files.probeContentType(saveFile.toPath());
+
+            log.info("mimeType: " + mimeType);
+            if (mimeType.startsWith("image")) {
+
+                // upload success 섬네일
+                File thumbFile = new File(uploadPath, "s_" + saveFileName);
+
+                Thumbnailator.createThumbnail(saveFile, thumbFile, 100, 100);
+
+                result.setImg(true);
+            } // end if
+
+            // 1. 이미지일때만 섬네일만들기
+            // 2. DTO 생성
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        log.info("size: " + size);
+
+        return result;
+    }
