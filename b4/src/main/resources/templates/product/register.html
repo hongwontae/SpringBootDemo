@@ -52,20 +52,23 @@
 
         const uploadBtn = document.querySelector(".uploadBtn")
         const uploadInput = document.querySelector(".uploadInput")
+        //썸네일 보여 줄 곳
         const uploadUL = document.querySelector(".uploadUL")
 
+        // 저장할 떄 보여주는 것.. 그니까 목록 보여주는것
         const saveBtn = document.querySelector(".saveBtn")
 
         const actionForm = document.querySelector(".actionForm")
 
         saveBtn.addEventListener("click", e => {
+            // 두개는 세트다.
             e.preventDefault()
             e.stopPropagation()
 
             const liArr = uploadUL.querySelectorAll("li")
 
             if(!liArr || liArr.length === 0) {
-                alert("파일을 넣으라구!")
+                alert("파일을 넣으세요!")
                 return
             }
 

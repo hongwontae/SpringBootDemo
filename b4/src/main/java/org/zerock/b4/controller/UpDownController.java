@@ -33,24 +33,30 @@ public class UpDownController {
 
     // Upload는 springboot로 조회는  webServer(nginx)로 
     @Value("${org.zerock.upload.path}") // import 시에 springframework으로 시작하는 Value
-    private String uploadPath;
+    private String uploadPath; // uploadPath => C:\\webserver\\nginx-1.24.0\\html => value 어노테이션으로 가져온다.
 
     @PostMapping("/upload")
     public List<UploadResultDTO> upload(MultipartFile[] files) {
 
-        //length 배열이라서 사용가능
+        //length list라 사용가능하다.
         // 만약 파일이 null값이거나 길이가 0이면 null 반환한다.
         if(files ==null || files.length == 0){
             return null;
         }
 
+        // resultList이름으로 배열리스트 구현
         List<UploadResultDTO> resultList = new ArrayList<>();
+
+
 
         // 들어오는 모든 파일들을 루프를 돌린다.
         // 배열이 매개변수 => 메개변수 한계 정하지 않음 => for : 메서드 용이
+        // 이 for loop는 들어온거 다 돌리는 루프이다. while과 같다.
         for (MultipartFile file : files) {
 
+            // 그냥 초기값 넣어줬다. 안전하게 하기 위해서
             UploadResultDTO result = null;
+
             // file의 메서드 사용가능한 이유는 for : => 이름 체인지해서
             // getOriginalFilename => 현재 파일의 이름과 확장자 모두 가져온다. 
             String fileName = file.getOriginalFilename();
@@ -58,25 +64,30 @@ public class UpDownController {
 
             // 업로드한 파일의 크기를 구한다.
             // long값으로 받아야 한다.
-            long size = file.getSize();
+            // byte 단위로 얻는다.
+            long size = file.getSize(); 
             log.info("size: " + size);
             
             // uuid => uuid Class => 들어오는 값의 중복을 피하기 위해 사용한다.
             // ramdomUUID => uuid형태로 바꾼다.
             // toString => uuid 형태를 문자열로 바꾼다.
+            // for 이니까 들어오는 첨부파일 하나 당 하나 생성한다.
             String uuidStr = UUID.randomUUID().toString();
 
-            // uuid+_+파일이름(확장자)
+            // uuid+_+파일이름(확장자) => 우리가 원하는 upload server 파일명
             String saveFileName = uuidStr + "_" + fileName;
 
             // File => 생성자를 통해서 File의 값을 넣어준느데
-            // (String (상위주소), String(파일이름)) => 하나의 객체가 주소와 이름을 갖는다.
+            // (String (주소), String(파일이름)) => 하나의 객체가 주소와 이름을 갖는다.
+            // saveFile은 주소와 파일이름_uuid를 얻는다.
+            // save 파일은 uploadPath saveFileName 객체, 들어오는 많은 파일의...
+            // 생성자가 파일을 만들어 내는 것이다.
             File saveFile = new File(uploadPath, saveFileName);
 
         try {
             // 파일 확장자 체크 (File extension check)
 
-            // 업로드한 파일 데이터를 saveFile에 복사한다.
+            // save 파일을 복사한다.
             FileCopyUtils.copy(file.getBytes(), saveFile);
 
             // 빌더 방식으로 result변수에 업로드된 uuid filename을 넣는다.
@@ -100,6 +111,7 @@ public class UpDownController {
 
                 // upload success 섬네일
                 // 중복을 피하기 위해서 s_추가
+                // 섬네일의 이름은? s_uuid_filename
                 File thumbFile = new File(uploadPath, "s_" + saveFileName);
                 // 썸네일을 추가한다.
                 Thumbnailator.createThumbnail(saveFile, thumbFile, 100, 100);
@@ -119,7 +131,7 @@ public class UpDownController {
 
         resultList.add(result);
         }// end for
-
+        //여기서 파일 두개가 저장된다.
         return resultList;
     }
 
