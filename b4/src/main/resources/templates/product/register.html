@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>상품등록 (Product Register)</title>
 </head>
+
 <body>
     <h1>Product Register Page</h1>
 
-    <input class="uploadInput" type="file" name="upload" multiple> 
+    <form class="actionForm" action="/product/register" method="post">
+        <div>
+            <input type="text" name="pname" value="상품1">
+        </div>
+        <div>
+            <input type="number" name="price" value="12000">
+        </div>
+        <div>
+            <button class="saveBtn">Register</button>
+        </div>
+    </form>
+
+    <input class="uploadInput" type="file" name="upload" multiple>
     <button class="uploadBtn">UPLOAD</button>
 
     <div class="uploadDiv">
@@ -23,12 +37,13 @@
             display: flex;
             flex-wrap: wrap;
         }
+
         .uploadUL li {
             margin: 1em;
             background-color: turquoise;
             padding: 1em;
             border: 1px solid darkblue;
-            border-radius:0.2em;
+            border-radius: 0.2em;
         }
     </style>
     <!--axios 사용하겠다는 것-->
@@ -39,47 +54,76 @@
         const uploadInput = document.querySelector(".uploadInput")
         const uploadUL = document.querySelector(".uploadUL")
 
-        uploadBtn.addEventListener("click", e =>{
+        const saveBtn = document.querySelector(".saveBtn")
+
+        const actionForm = document.querySelector(".actionForm")
+
+        saveBtn.addEventListener("click", e => {
+            e.preventDefault()
+            e.stopPropagation()
+
+            const liArr = uploadUL.querySelectorAll("li")
+
+            if(!liArr || liArr.length === 0) {
+                alert("파일을 넣으라구!")
+                return
+            }
+
+            let str=""
+            for(let liObj of liArr) {
+                console.log(liObj)
+                const uuid = liObj.getAttribute("data-uuid")
+                const fileName = liObj.getAttribute("data-filename")
+                console.log(uuid, fileName)
+                console.log("------------------------")
+                str += `<input type='hidden' name='fileNames' value='${uuid}_${fileName}'>`
+            }
+
+            actionForm.innerHTML += str
+
+        },false)
+
+        uploadBtn.addEventListener("click", e => {
             e.preventDefault()
             e.stopPropagation()
 
             console.dir(uploadInput.files)
 
-            if(!uploadInput.files || uploadInput.files.length === 0){
+            if (!uploadInput.files || uploadInput.files.length === 0) {
                 return
             }
 
             // 메모리상의 폼태그
             const formData = new FormData()
 
-            for(let i = 0; i<uploadInput.files.length; i++){
+            for (let i = 0; i < uploadInput.files.length; i++) {
                 formData.append("files", uploadInput.files[i])
             }
 
             console.dir(formData)
-            
-            const header = {headers: {"Content-Type": "multipart/form-data"}}
+
+            const header = { headers: { "Content-Type": "multipart/form-data" } }
 
             axios.post('http://localhost:8080/upload', formData, header)
-            .then(res => {
-                const result = res.data
-                console.log(result)
-                showProducts(result)
+                .then(res => {
+                    const result = res.data
+                    console.log(result)
+                    showProducts(result)
 
-            })
+                })
 
 
-        },false)
+        }, false)
 
         const showProducts = (arr) => {
-            
-            let str =""
-            
-            for(const uploadFile of arr){
-                const {fileName,link,uuid} = uploadFile
+
+            let str = ""
+
+            for (const uploadFile of arr) {
+                const { fileName, link, uuid } = uploadFile
 
                 str += `
-                <li>
+                <li data-uuid='${uuid}' data-fileName='${fileName}'>
                     <div>
                         <a href='http://localhost/${uuid}_${fileName}' target='_blank'>
                         <img src='http://localhost/${link}'/>
@@ -90,19 +134,40 @@
             }
             uploadUL.innerHTML += str
         }
-        const removeFile = (e, uuid, fileName) =>{
+        const removeFile = (e, uuid, fileName) => {
             e.preventDefault()
             e.stopPropagation()
             alert("remove file")
-            
+
             const liObj = e.target.closest("li")
 
             console.log(liObj)
-            
+
+            // POST 방식으로 사용시 js측에선 객체 하나 선언해줌
+            //const param = {fileName: uuid + "_" + fileName}
+
+            axios.delete(`http://localhost:8080/removeFile/${uuid}_${fileName}`)
+
             liObj.remove()
 
         }
 
+        // beforeunload는 보안상으로 사용자가 아예 못나가게 할 수 있다.
+        // 이방법도 안전하진 않다
+        // 강제종료및 창닫히는 경우는 못막기때문이다. 
+        // 이를 처리하기위해 DB에 실제존재하는지 확인하고 DB에 없으면 삭제
+        // 하지만 실제 DB는 100만건 이상
+        // 대용량 처리를 할때 ⇒ 스프링 배치 (Spring Batch)
+        // 배치는 Crontab(스케쥴러를 이용해 사용한다)
+        // 사용자의 트래픽 가장적은 시간대 오전 6~7
+        // 이런게있다 라는건 알아둬야된다.
+        window.onbeforeunload = function () {
+            console.log("AAAAAAAAAAAAAA")
+
+            return ''
+        }
+
     </script>
 </body>
+
 </html>

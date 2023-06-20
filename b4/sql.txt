@@ -1,0 +1,94 @@
+## product 테이블 생성
+create table tbl_product (
+
+pno int auto_increment primary key,
+pname varchar(500) NOT null,
+price int DEFAULT 0,
+status boolean DEFAULT true,
+regDate timestamp default now(),
+modDate timestamp DEFAULT now()
+)
+;
+## 더미데이터 10개 넣기
+insert into tbl_product (pname,price) value('상품', 1000);
+
+## 확인
+select * from tbl_product order by pno desc;
+
+## 10개씩 더미데이터 밀어넣기 1280 또는 2560
+insert into tbl_product (pname,price) (select pname,price from tbl_product)
+## 넣은 로우수 확인
+select count(*) from tbl_product
+## 상품의 이름변경
+update tbl_product set pname = concat(pname, pno) where pno>0;
+## 상품의 가격 변경
+update tbl_product  set price = (price * mod(pno,10))
+
+## 3315 3313 3309 3300 3298 -- 2560개의 경우
+## 1652 1651 1650 1649 1648 -- 1280개의 경우
+## --------------------------------------
+
+## 이미지 테이블생성
+## 이미지에는 regDate modDate는 필요없다
+## product table이 생성할때 같이 생성된다
+create table tbl_product_image (
+	uuid varchar(50) primary key,
+	filename varchar(200) not null,
+	pno int not null,
+	ord int default 0
+)
+;
+
+## uuid함수 확인 oracle은 없음
+SELECT UUID();
+
+## pno에 맞는 더미데이터 넣기
+insert into tbl_product_image (uuid,filename,pno, ord)
+values(uuid(),'fi.jpg',3315,0)
+
+
+insert into tbl_product_image (uuid,filename,pno, ord)
+values(uuid(),'f2.jpg',3315,0)
+
+insert into tbl_product_image (uuid,filename,pno, ord)
+values(uuid(),'f3.jpg',3313,0)
+
+
+insert into tbl_product_image (uuid,filename,pno, ord)
+values(uuid(),'f4.jpg',3313,1)
+
+
+## 확인
+select * from tbl_product_image 
+
+## Join 전통적인
+select 
+	p.pno, p.pname, p.price, p.status, concat(pi.uuid,'_',pi.filename) fileName 
+from tbl_product p 
+left outer join tbl_product_image pi on pi.pno = p.pno
+where pi.ord = 0 or pi.ord is null  
+order by p.pno desc
+limit 0, 10
+;
+
+## index 생성
+create index idx_product_image1 on tbl_product_image (pno desc, ord asc);
+
+## 조회후 ajax로 이미지를 가져오는방법
+## 조회할때 한번에 가져오는방법
+select *
+from tbl_product p 
+
+
+## mySQL은 limit조건이 맨아래에 있어야된다. 
+## 부분범위 처리기법 join의 select로 범위를 줄여놓고 조인한다
+select *
+from 
+	(select * from tbl_product p where pno>0 order by pno desc limit 0, 10) p2
+	left outer join tbl_product_image pi on pi.pno = p2.pno
+	where pi.ord = 0 or pi.ord is null
+	order by p2.pno desc
+;
+
+
+
