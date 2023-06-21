@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 목록(Product List>)</title>
+</head>
+<body>
+
+    <ul>
+        <li th:each="dto :${res.list}">
+          <a th:href="@{|/product/modify/${dto.pno}|(page=${pageRequestDTO.page}, size=${pageRequestDTO.size})}">Go to /hello</a>    
+          
+          [[${dto}]]
+          <img  th:src="|http://localhost/s_${dto.fileName}|">
+        </li>
+      </ul>
+</body>
+</html>
