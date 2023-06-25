@@ -10,7 +10,7 @@
 <body>
     <h1>Product Register Page</h1>
 
-    <form class="actionForm" action="/product/register" method="post">
+    <form class="actionForm" action="/product/register" method="post"> <!-- get방식으로 url로 register페이지에 왔고 form태그내의 button(submit)은 action을 따라간다. post방식, product/register controller로 간다.  -->
         <div>
             <input type="text" name="pname" value="상품1">
         </div>
@@ -31,6 +31,7 @@
         </ul>
 
     </div>
+
     <style>
         .uploadUL {
             list-style: none;
@@ -46,6 +47,7 @@
             border-radius: 0.2em;
         }
     </style>
+    
     <!--axios 사용하겠다는 것-->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
