@@ -1,0 +1,6 @@
+NGINX에 adminlte에서 받은 plugin dist 폴더 html 폴더에넣기
+
+
+static 폴더에 공유 드라이브에 있는 static으로 바꾸기
+
+nginx 실행후 springboot 실행하기

@@ -1,0 +1,13 @@
+## 멤버테이블 생성
+
+create table tbl_memeber (
+  email varchar(100) primary key,
+  mpw varchar(100) not null,
+  mname varchar(100) not null
+)
+
+## 권한 테이블 생성
+create table tbl_member_role (
+  email varchar(100) not null,
+  rolename varchar(50) not null
+);
