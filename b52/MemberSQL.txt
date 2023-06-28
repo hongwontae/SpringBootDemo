@@ -5,9 +5,28 @@ create table tbl_memeber (
   mpw varchar(100) not null,
   mname varchar(100) not null
 )
+;
 
 ## 권한 테이블 생성
 create table tbl_member_role (
   email varchar(100) not null,
   rolename varchar(50) not null
-);
+)
+;
+
+## 더미 데이터 넣기
+insert into tbl_memeber (email, mpv, mname) values (#(email), #(mpw), #(mname))
+
+insert into tbl_member_role (email, rolename) values(#(email), #(rolename))
+
+
+select * from tbl_memeber tm ;
+select * from tbl_member_role tmr ;
+
+## join
+select * from tbl_memeber tm inner join tbl_member_role tmr on tmr.email = tm.email where tm.email = "test1@gmail.com";
+
+
+## 수정시 수정번호 확인 띄우고 수정하게
+## 삭제시 삭제확인 모달창 ->선택
+## 등록시 모달창후 리스트로
